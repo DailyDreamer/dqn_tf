@@ -17,7 +17,7 @@ def conv2d(x, y_dim, kernel_size, stride, name='conv2d'):
         initializer=tf.constant_initializer(0.1))
 
     conv = tf.nn.conv2d(x, w, stride, 'VALID', data_format='NCHW')
-    y = tf.nn.relu(tf.nn.bias_add(conv, b, data_format))
+    y = tf.nn.relu(tf.nn.bias_add(conv, b, data_format='NCHW'))
   return y, w, b
 
 def linear(x, y_dim, activation_fn=tf.nn.relu, name='linear'):
@@ -26,7 +26,6 @@ def linear(x, y_dim, activation_fn=tf.nn.relu, name='linear'):
         initializer=tf.contrib.layers.xavier_initializer())
     b = tf.get_variable('b', [y_dim],
         initializer=tf.constant_initializer(0.1))
-
     y = tf.nn.bias_add(tf.matmul(x, w), b)
 
     if activation_fn != None:
