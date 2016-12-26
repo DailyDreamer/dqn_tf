@@ -31,3 +31,6 @@ class QNetwork(object):
 
       self.loss = tf.reduce_mean(clipped_error(self.q_target_placeholder - q_acted), name='loss')
       self.optimizer = tf.train.RMSPropOptimizer(learning_rate, momentum=0.95, epsilon=0.01).minimize(self.loss)
+
+    with tf.variable_scope('loss_summary'):
+      self.loss_summary_op = tf.scalar_summary(self.loss.op.name, self.loss)

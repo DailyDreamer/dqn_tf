@@ -6,8 +6,3 @@
 
 ## Note
 implement "NCHW" data format so it can run faster on Tensorflow GPU version, meanwhile it can not run on Tensorflow CPU version.
-
-## TODO
-- [ ] summary
-- [ ] log reward
-- [ ] agent play
