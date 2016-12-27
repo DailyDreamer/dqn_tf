@@ -27,23 +27,26 @@ flags.DEFINE_integer('min_reward', -1, 'min_reward')
 flags.DEFINE_float('discount', 0.99, 'discount factor')
 flags.DEFINE_float('learning_rate', 0.00025, 'The learning rate of training')
 
-TIME=datetime.now().strftime("%Y%m%d-%H%M%S")
-flags.DEFINE_string('gym_dir', './gym/'+TIME, 'gym dir')
-flags.DEFINE_string('summary_dir', './summary/'+TIME, 'summary dir')
-flags.DEFINE_string('model_dir', './model/'+TIME+'-', 'model dir')
+CURRENT_TIME=datetime.now().strftime("%Y%m%d-%H%M%S")
+BASE_SUMMARY_DIR = './summary/'
+flags.DEFINE_string('summary_dir', BASE_SUMMARY_DIR+CURRENT_TIME+'/', 'summary dir')
+BASE_MODEL_DIR = './model/'
+flags.DEFINE_string('base_model_dir', BASE_MODEL_DIR, 'base model dir')
+flags.DEFINE_string('model_dir', BASE_MODEL_DIR+CURRENT_TIME+'/', 'model dir')
 
 # test super parameter, for small memory size and computation power computer
-flags.DEFINE_integer('replay_memory_size', 10000, 'replay_memory_size')
+flags.DEFINE_integer('replay_memory_size', 10000, 'replay memory size')
 flags.DEFINE_integer('max_steps', 100000, 'total train steps')
 # real super parameter, for large memory size and computation power computer
 #flags.DEFINE_integer('replay_memory_size', 1000000, 'replay_memory_size')
 #flags.DEFINE_integer('max_steps', 50000000, 'total train steps')
 
 # for restore parameter
-MODEL_TIME=''
-BASESTEP=0
-flags.DEFINE_string('restore_dir', './model/'+MODEL_TIME+'-'+str(BASESTEP)+'.ckpt', 'restore dir')
-flags.DEFINE_integer('basestep', BASESTEP, 'base steps of restored model')
+MODEL_TIME='20161227-183605'
+flags.DEFINE_string('restore_model_dir', BASE_MODEL_DIR+MODEL_TIME+'/', 'restored model dir')
+flags.DEFINE_string('restore_summary_dir', BASE_SUMMARY_DIR+MODEL_TIME+'/', 'restored summary dir')
+flags.DEFINE_string('gym_dir', './gym/'+MODEL_TIME+'/', 'gym dir')
+
 
 flags.DEFINE_boolean('is_display', True, 'is_display')
 flags.DEFINE_boolean('is_train', True, 'Train or play, need to restore_dir model when playing')

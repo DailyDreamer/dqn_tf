@@ -49,10 +49,11 @@ class Agent(object):
       self.init_op = tf.global_variables_initializer()
     
     self.saver = tf.train.Saver()
+    if not os.path.exists(conf.base_model_dir):
+      os.mkdir(conf.base_model_dir)
 
   def train(self):
     conf = self.conf
-    self.summary_writer = tf.summary.FileWriter(conf.summary_dir)
     # init some local variables
     ep = conf.init_ep
     ep_step_drop = (conf.init_ep - conf.final_ep) / conf.final_ep_frame
@@ -65,17 +66,28 @@ class Agent(object):
     
     # start training
     with tf.Session() as sess:
+      model_dir = ''
+      summary_dir = ''
       if conf.is_restore_model:
         print('Restore model...')
-        ckpt = tf.train.get_checkpoint_state(conf.restore_dir)
-        self.saver.restore(sess, ckpt.model_checkpoint_path)
+        ckpt_path = tf.train.get_checkpoint_state(conf.restore_model_dir).model_checkpoint_path
+        self.saver.restore(sess, ckpt_path)
         print('Model restored')
-        basestep = conf.basestep
+        model_dir = conf.restore_model_dir
+        summary_dir = conf.restore_summary_dir
+        basestep = int(ckpt_path.split('-')[-1])
         ep -= ep_step_drop*basestep
       else:
         sess.run(self.init_op)
         sess.run(self.update_target_op)
         basestep = 0
+        if not os.path.exists(conf.model_dir):
+          os.mkdir(conf.model_dir)
+        model_dir = conf.model_dir
+        summary_dir = conf.summary_dir
+
+      self.summary_writer = tf.summary.FileWriter(summary_dir)
+
       for step in range(conf.max_steps):
         # ep-greedy action select
         if np.random.rand(1) < ep:
@@ -110,10 +122,10 @@ class Agent(object):
           current_reward = 0
 
         if (step+basestep) % conf.save_freq == (conf.save_freq - 1):
-          save_path = conf.model_dir+str(step+basestep)+'.ckpt'
+          save_path = model_dir+'ckpt'
           self.saver.save(sess, save_path, step+basestep)
       
-    self.summary_writer.close()
+      self.summary_writer.close()
 
 
   def update_q(self, sess, batch_size, discount, step):
@@ -133,38 +145,39 @@ class Agent(object):
   
   def play(self, n_step=10000, n_episode=100, test_ep=0.1):
     conf = self.conf
+    # start training
+    with tf.Session() as sess:
+      print('Restore model...')
+      ckpt_path = tf.train.get_checkpoint_state(conf.restore_model_dir).model_checkpoint_path
+      self.saver.restore(sess, ckpt_path)
+      print('Model restored')
 
-    print('Restore model...')
-    ckpt = tf.train.get_checkpoint_state(conf.restore_dir)
-    self.saver.restore(sess, ckpt.model_checkpoint_path)
-    print('Model restored')
+      if not conf.is_display:
+        self.env.env.monitor.start(conf.gym_dir)
 
-    if not conf.is_display:
-      self.env.env.monitor.start(conf.gym_dir)
+      best_reward = 0
+      for i in range(n_episode):
+        current_reward = 0
+        screen = self.env.new_random_game()
+        for _ in range(conf.agent_history_length):
+          self.history.add(screen)
+        for _ in range(n_step):
+          # ep-greedy action select
+          if np.random.rand(1) < test_ep:
+            action = self.env.random_action
+          else: #feed one state, not a batch
+            action = sess.run(self.q.actions, feed_dict={self.q.screen_placeholder: [self.history.get()]})[0]
+          # take action
+          screen, reward, done = self.env.act(action, is_training=False)
+          # add to memory
+          self.history.add(screen)
 
-    best_reward = 0
-    for i in xrange(n_episode):
-      current_reward = 0
-      screen = self.env.new_random_game()
-      for _ in range(conf.agent_history_length):
-        self.history.add(screen)
-      for _ in range(n_step):
-        # ep-greedy action select
-        if np.random.rand(1) < test_ep:
-          action = self.env.random_action
-        else: #feed one state, not a batch
-          action = sess.run(self.q.actions, feed_dict={self.q.screen_placeholder: [self.history.get()]})[0]
-        # take action
-        screen, reward, done = self.env.act(action, is_training=False)
-        # add to memory
-        self.history.add(screen)
+          current_reward += reward
+          if done:
+            break
+        if current_reward > best_reward:
+          best_reward = current_reward
+        print("episode %d/%d, reward %d, best reward %d " % (i, n_episode, current_reward, best_reward))
 
-        current_reward += reward
-        if done:
-          break
-      if current_reward > best_reward:
-        best_reward = current_reward
-      print("episode %d/%d, reward %d, best reward %d " % (i, n_episode, current_reward, best_reward))
-
-    if not conf.is_display:
-      self.env.env.monitor.close()
+      if not conf.is_display:
+        self.env.env.monitor.close()
