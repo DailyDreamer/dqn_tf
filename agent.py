@@ -136,12 +136,12 @@ class Agent(object):
     next_q_max = sess.run(self.q_target.q_max, feed_dict={self.q_target.screen_placeholder: next_s})
     q_target_value = r + (1.0 - done) * discount * next_q_max
 
-    _, loss_summary = sess.run([self.q.optimizer, self.q.loss_summary_op], feed_dict={
+    _, summary = sess.run([self.q.optimizer, self.q.summary_op], feed_dict={
       self.q.screen_placeholder: s,
       self.q.q_target_placeholder: q_target_value,
       self.q.action_placeholder: a,
     })
-    self.summary_writer.add_summary(loss_summary, step)
+    self.summary_writer.add_summary(summary, step)
   
   def play(self, n_step=10000, n_episode=100, test_ep=0.1):
     conf = self.conf

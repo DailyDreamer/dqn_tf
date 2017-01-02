@@ -32,5 +32,8 @@ class QNetwork(object):
       self.loss = tf.reduce_mean(clipped_error(self.q_target_placeholder - q_acted), name='loss')
       self.optimizer = tf.train.RMSPropOptimizer(learning_rate, momentum=0.95, epsilon=0.01).minimize(self.loss)
 
-    with tf.variable_scope('loss_summary'):
-      self.loss_summary_op = tf.summary.scalar(self.loss.op.name, self.loss)
+    with tf.variable_scope('summary'):
+      self.q_avg = tf.reduce_mean(self.q_max, name='q_avg')
+      q_summary_op = tf.summary.scalar(self.q_avg.op.name, self.q_avg)
+      loss_summary_op = tf.summary.scalar(self.loss.op.name, self.loss)
+      self.summary_op = tf.merge_summary([q_summary_op, loss_summary_op])

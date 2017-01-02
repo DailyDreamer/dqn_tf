@@ -9,19 +9,21 @@ class Env():
     self.dims = (screen_height, screen_width)
     self.no_op_max = no_op_max
     self.is_display = is_display
-
     self._screen = None
+    self._prevscreen = None
     self.reward = 0
     self.done = True
 
   def new_random_game(self):
     self._screen = self.env.reset()
+    self._prevscreen = self._screen
     for _ in range(random.randint(0, self.no_op_max - 1)):
-      self._random_step()
+      self._step(0)
     self.render()
     return self.screen
 
   def _step(self, action):
+    self._prevscreen = self._screen
     self._screen, self.reward, self.done, _ = self.env.step(action)
 
   def _random_step(self):
@@ -29,7 +31,8 @@ class Env():
 
   @ property
   def screen(self):
-    gray = (0.2126 * self._screen[:,:,0] + 0.7152 * self._screen[:,:,1] + 0.0722 * self._screen[:,:,2])
+    no_flicker_screen = np.maximum(self._screen, self._prevscreen)
+    gray = (0.2126 * no_flicker_screen[:,:,0] + 0.7152 * no_flicker_screen[:,:,1] + 0.0722 * no_flicker_screen[:,:,2])
     return scipy.misc.imresize(gray/255, self.dims)
 
   @property
