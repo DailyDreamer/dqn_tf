@@ -1,10 +1,7 @@
 import tensorflow as tf
 
 def clipped_error(x):
-  try:
-    return tf.select(tf.abs(x) < 1.0, 0.5 * tf.square(x), tf.abs(x) - 0.5)
-  except:
-    return tf.where(tf.abs(x) < 1.0, 0.5 * tf.square(x), tf.abs(x) - 0.5)
+  return tf.select(tf.abs(x) < 1.0, 0.5 * tf.square(x), tf.abs(x) - 0.5)
 
 def conv2d(x, y_dim, kernel_size, stride, name='conv2d'):
   with tf.variable_scope(name):

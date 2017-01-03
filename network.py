@@ -27,13 +27,13 @@ class QNetwork(object):
       self.action_placeholder = tf.placeholder(tf.int32, [None], name='action_placeholder')
 
       action_one_hot = tf.one_hot(self.action_placeholder, action_size, 1.0, 0.0, name='action_one_hot')
-      q_acted = tf.reduce_sum(self.q * action_one_hot, reduction_indices=1, name='q_acted')
+      q_acted = tf.reduce_sum(tf.mul(self.q, action_one_hot), 1, name='q_acted')
 
       self.loss = tf.reduce_mean(clipped_error(self.q_target_placeholder - q_acted), name='loss')
       self.optimizer = tf.train.RMSPropOptimizer(learning_rate, momentum=0.95, epsilon=0.01).minimize(self.loss)
 
     with tf.variable_scope('summary'):
-      self.q_avg = tf.reduce_mean(self.q_max, name='q_avg')
+      self.q_avg = tf.reduce_mean(self.q, name='q_avg')
       q_summary_op = tf.summary.scalar(self.q_avg.op.name, self.q_avg)
       loss_summary_op = tf.summary.scalar(self.loss.op.name, self.loss)
       self.summary_op = tf.merge_summary([q_summary_op, loss_summary_op])
