@@ -35,6 +35,6 @@ class QNetwork(object):
     self.q_avg = tf.reduce_mean(self.q, name='q_avg')
 
     with tf.variable_scope('average'):
-      q_summary_op = tf.summary.scalar('q', self.q_avg)
-      loss_summary_op = tf.summary.scalar('loss', self.loss)
+      q_summary_op = tf.summary.scalar(self.q_avg.op.name, self.q_avg)
+      loss_summary_op = tf.summary.scalar(self.loss.op.name, self.loss)
       self.summary_op = tf.merge_summary([q_summary_op, loss_summary_op])

@@ -41,7 +41,7 @@ class Agent(object):
     self.reward_placeholder = tf.placeholder(tf.int32, None, name='reward')
     with tf.variable_scope('episode'):
       self.episode_reward_summary_op = tf.summary.scalar(
-        'avg reward', 
+        self.reward_placeholder.op.name, 
         self.reward_placeholder
       )
     with tf.variable_scope('update_target'):
@@ -99,9 +99,9 @@ class Agent(object):
           ep -= ep_step_drop
         # take action
         screen, reward, done = self.env.act(action, is_training=True)
+        current_reward += reward
         # add to memory
         norm_reward = max(conf.min_reward, min(conf.max_reward, reward))
-        current_reward += norm_reward
         self.history.add(screen)
         self.replay_memory.add(screen, action, norm_reward, done)
         # update
