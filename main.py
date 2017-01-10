@@ -6,7 +6,6 @@ from agent import Agent
 flags = tf.app.flags
 flags.DEFINE_integer('agent_history_length', 4, 'agent_history_length')
 
-flags.DEFINE_string('env_name', 'Breakout-v0', 'env_name')
 flags.DEFINE_integer('screen_height', 84, 'screen_height')
 flags.DEFINE_integer('screen_width', 84, 'screen_width')
 flags.DEFINE_integer('no_op_max', 30, 'no_op_max')
@@ -41,12 +40,12 @@ flags.DEFINE_integer('max_steps', 100000, 'total train steps')
 #flags.DEFINE_integer('replay_memory_size', 1000000, 'replay_memory_size')
 #flags.DEFINE_integer('max_steps', 50000000, 'total train steps')
 
+flags.DEFINE_string('env_name', 'Breakout-v0', 'env_name')
 # for restore parameter
-MODEL_TIME='20161227-183605'
+MODEL_TIME='20170106-183605'
 flags.DEFINE_string('restore_model_dir', BASE_MODEL_DIR+MODEL_TIME+'/', 'restored model dir')
 flags.DEFINE_string('restore_summary_dir', BASE_SUMMARY_DIR+MODEL_TIME+'/', 'restored summary dir')
 flags.DEFINE_string('gym_dir', './gym/'+MODEL_TIME+'/', 'gym dir')
-
 
 flags.DEFINE_boolean('is_display', True, 'is_display')
 flags.DEFINE_boolean('is_train', True, 'Train or play, need to restore_dir model when playing')

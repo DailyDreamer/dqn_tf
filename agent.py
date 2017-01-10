@@ -37,10 +37,11 @@ class Agent(object):
       conf.learning_rate, 
       'q_target'
     )
-    with tf.variable_scope('reward_summary'):
-      self.reward_placeholder = tf.placeholder(tf.int32, None, name='episode_reward_summary')
+
+    self.reward_placeholder = tf.placeholder(tf.int32, None, name='reward')
+    with tf.variable_scope('episode'):
       self.episode_reward_summary_op = tf.summary.scalar(
-        self.reward_placeholder.op.name, 
+        'avg reward', 
         self.reward_placeholder
       )
     with tf.variable_scope('update_target'):

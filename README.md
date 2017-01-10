@@ -15,6 +15,12 @@ When set `is_display` to `False`, some viedo clips will be record at `./gym` dir
 
 When set `is_train` to `False` or set `is_restore_model` to `True`, `MODEL_TIME` must be set correctly. 
 
+run the following command to start.
+
+```python
+python main.py
+```
+
 ## Summary Data
 
 ```bash
